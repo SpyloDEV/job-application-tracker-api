@@ -96,8 +96,7 @@ class ApplicationRepository:
         now = datetime.now(UTC)
         week_start = now - timedelta(days=7)
         month_start = now - timedelta(days=30)
-        today = date.today()
-        in_seven_days = today + timedelta(days=7)
+        in_seven_days = date.today() + timedelta(days=7)
         result = await self.session.execute(
             select(
                 func.count(JobApplication.id),
@@ -106,7 +105,8 @@ class ApplicationRepository:
                 func.sum(
                     case(
                         (
-                            JobApplication.follow_up_date.between(today, in_seven_days),
+                            JobApplication.follow_up_date.is_not(None)
+                            & (JobApplication.follow_up_date <= in_seven_days),
                             1,
                         ),
                         else_=0,
